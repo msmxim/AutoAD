@@ -39,6 +39,17 @@ function loadConfig() {
     }
 }
 
+async function sendMessageNow(client, chatId) {
+    if (!lastMessageData) return;
+    
+    try {
+        await client.sendMessage(chatId, lastMessageData);
+        console.log(`[${new Date().toLocaleTimeString()}] Отправлено в ${chatId}`);
+    } catch (error) {
+        console.error(`Ошибка отправки в ${chatId}:`, error.message);
+    }
+}
+
 async function setupIntervalSending(client, chatId, intervalMinutes) {
     const sendMessage = async () => {
         if (!lastMessageData) return;
@@ -51,8 +62,10 @@ async function setupIntervalSending(client, chatId, intervalMinutes) {
         }
     };
 
-    await sendMessage();
+    // Сначала отправляем сразу
+    await sendMessageNow(client, chatId);
     
+    // Затем настраиваем интервал
     const intervalMs = intervalMinutes * 60 * 1000;
     const intervalId = setInterval(sendMessage, intervalMs);
     
@@ -85,7 +98,10 @@ async function setupIntervalSending(client, chatId, intervalMinutes) {
         await client.connect();
     }
 
-    // Запускаем интервалы для каждого чата
+    // Сначала проверяем сообщения, чтобы lastMessageData был заполнен
+    await checkMessages();
+
+    // Затем запускаем интервалы для каждого чата
     const intervalIds = [];
     for (const [chatId, interval] of Object.entries(CHAT_INTERVALS)) {
         const id = await setupIntervalSending(client, chatId, interval);
@@ -116,7 +132,6 @@ async function setupIntervalSending(client, chatId, intervalMinutes) {
     }
 
     console.log(`Мониторинг бота ${config.sourceBot}...`);
-    checkMessages();
 
     process.on('SIGINT', async () => {
         // Очищаем все интервалы перед выходом
