@@ -5,6 +5,7 @@ const readline = require('readline');
 
 const CHAT_INTERVALS = {
     '@arz_vice': 5,
+    '@arz_lavka': 5,
     '@crarizonarp': 5,
     '@arizona_market_vice': 15,
     '@arzmarket_vice': 60,
