@@ -1,1 +1,1 @@
-npm install telegram gramjs fs readline
+npm install telegram fs readline-sync
